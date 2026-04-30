@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = AppDatabase.getDatabase(application).dao()
@@ -22,19 +23,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadSessionData(sessionId: String) {
         viewModelScope.launch {
-            sessions.collect { all ->
-                _currentSession.value = all.find { it.id == sessionId }
-            }
+            sessions.collect { all -> _currentSession.value = all.find { it.id == sessionId } }
         }
         viewModelScope.launch {
-            dao.getPedalsForSession(sessionId).collect { pedals ->
-                _currentPedals.value = pedals
-            }
+            dao.getPedalsForSession(sessionId).collect { _currentPedals.value = it }
         }
         viewModelScope.launch {
-            dao.getConnectionsForSession(sessionId).collect { connections ->
-                _currentConnections.value = connections
-            }
+            dao.getConnectionsForSession(sessionId).collect { _currentConnections.value = it }
         }
     }
 
@@ -50,6 +45,39 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             dao.deletePedalsForSession(sessionId)
             dao.deleteConnectionsForSession(sessionId)
+        }
+    }
+
+    fun deleteSession(sessionId: String) {
+        viewModelScope.launch {
+            dao.deletePedalsForSession(sessionId)
+            dao.deleteConnectionsForSession(sessionId)
+            dao.deleteSession(sessionId)
+        }
+    }
+
+    fun cloneSession(original: SessionEntity) {
+        viewModelScope.launch {
+            val newId = UUID.randomUUID().toString()
+            dao.insertSession(original.copy(
+                id = newId,
+                songTitle = original.songTitle + " (Copy)",
+                date = System.currentTimeMillis()
+            ))
+            val idMap = mutableMapOf<String, String>()
+            dao.getPedalsForSession(original.id).first().forEach { pedal ->
+                val newPedalId = UUID.randomUUID().toString()
+                idMap[pedal.id] = newPedalId
+                dao.insertPedal(pedal.copy(id = newPedalId, sessionId = newId))
+            }
+            dao.getConnectionsForSession(original.id).first().forEach { conn ->
+                dao.insertConnection(conn.copy(
+                    id = UUID.randomUUID().toString(),
+                    sessionId = newId,
+                    fromPedalId = idMap[conn.fromPedalId] ?: conn.fromPedalId,
+                    toPedalId   = idMap[conn.toPedalId]   ?: conn.toPedalId
+                ))
+            }
         }
     }
 

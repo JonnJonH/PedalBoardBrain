@@ -1,6 +1,7 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,13 +18,14 @@ import com.pedalboard.recreator.data.AppViewModel
 import com.pedalboard.recreator.data.SessionEntity
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SessionListScreen(
     viewModel: AppViewModel,
     onNavigateToDetail: (String) -> Unit
 ) {
-    var showDialog by remember { mutableStateOf(false) }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var sessionForAction by remember { mutableStateOf<SessionEntity?>(null) }
     val sessions by viewModel.sessions.collectAsStateWithLifecycle(initialValue = emptyList())
 
     Scaffold(
@@ -38,7 +40,7 @@ fun SessionListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showDialog = true },
+                onClick = { showCreateDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
@@ -62,7 +64,10 @@ fun SessionListScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onNavigateToDetail(session.id) },
+                        .combinedClickable(
+                            onClick = { onNavigateToDetail(session.id) },
+                            onLongClick = { sessionForAction = session }
+                        ),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -74,12 +79,16 @@ fun SessionListScreen(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "${session.section} - ${session.part}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        val subtitle = listOf(session.section, session.part)
+                            .filter { it.isNotBlank() }.joinToString(" / ")
+                        if (subtitle.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                         if (session.notes.isNotBlank()) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -93,9 +102,41 @@ fun SessionListScreen(
             }
         }
 
-        if (showDialog) {
+        // Long-press action sheet
+        sessionForAction?.let { session ->
+            AlertDialog(
+                onDismissRequest = { sessionForAction = null },
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = { Text(session.songTitle, fontWeight = FontWeight.Bold) },
+                text = { Text("What would you like to do with this session?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.cloneSession(session)
+                            sessionForAction = null
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) { Text("Clone") }
+                },
+                dismissButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = { sessionForAction = null }) { Text("Cancel") }
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteSession(session.id)
+                                sessionForAction = null
+                            }
+                        ) {
+                            Text("Delete", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+            )
+        }
+
+        if (showCreateDialog) {
             CreateSessionDialog(
-                onDismiss = { showDialog = false },
+                onDismiss = { showCreateDialog = false },
                 onCreate = { songTitle, section, part, notes ->
                     val newSession = SessionEntity(
                         id = UUID.randomUUID().toString(),
@@ -107,7 +148,7 @@ fun SessionListScreen(
                         fullBoardImagePath = null
                     )
                     viewModel.addSession(newSession)
-                    showDialog = false
+                    showCreateDialog = false
                     onNavigateToDetail(newSession.id)
                 }
             )
@@ -165,11 +206,7 @@ fun CreateSessionDialog(
         },
         confirmButton = {
             Button(
-                onClick = { 
-                    if (songTitle.isNotBlank()) {
-                        onCreate(songTitle, section, part, notes)
-                    }
-                },
+                onClick = { if (songTitle.isNotBlank()) onCreate(songTitle, section, part, notes) },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) { Text("Create", color = MaterialTheme.colorScheme.onPrimary) }
         },
