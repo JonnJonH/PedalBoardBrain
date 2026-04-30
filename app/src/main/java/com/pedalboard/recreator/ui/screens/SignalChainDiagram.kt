@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+ï»¿package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -85,7 +85,7 @@ fun SignalChainDiagram(
             DiagramArrow()
         }
 
-        // Split rows — two columns, empty slots show a dashed pass-through line
+        // Split rows - two columns, empty slots show a dashed pass-through line
         itemsIndexed(splitRows) { index, (left, right) ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -132,7 +132,7 @@ fun SignalChainDiagram(
     }
 }
 
-/** Dashed vertical line — signal passing through unchanged on this side */
+/** Dashed vertical line - signal passing through unchanged on this side */
 @Composable
 fun PassThroughSlot() {
     val lineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)

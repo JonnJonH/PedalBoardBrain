@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+ï»¿package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -85,7 +85,7 @@ fun SessionDetailScreen(
                 )
             )
         },
-        // Only show the Recreation FAB when a chain exists — no Add button
+        // Only show the Recreation FAB when a chain exists - no Add button
         floatingActionButton = {
             if (pedals.isNotEmpty()) {
                 FloatingActionButton(

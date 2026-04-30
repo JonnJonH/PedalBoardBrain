@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+﻿package com.pedalboard.recreator.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager

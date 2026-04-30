@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+ï»¿package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
@@ -75,7 +75,7 @@ fun SetupWizardScreen(
                             WizardPrompt("Pre-Amp Pedal", "Pedal captured. Any more pre-amp pedals?")
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 WizardButton("Add Another Pre-Amp Pedal") { viewModel.addAnotherPreAmp() }
-                                WizardButton("Done — Go to FX Loop", secondary = true) { viewModel.finishPreAmp() }
+                                WizardButton("Done - Go to FX Loop", secondary = true) { viewModel.finishPreAmp() }
                             }
                         }
 

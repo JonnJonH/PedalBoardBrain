@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+ï»¿package com.pedalboard.recreator.ui.screens
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -79,7 +79,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
     fun addAnotherPreAmp() { _step.value = WizardStep.PreAmpCapture }
     fun finishPreAmp()     { _step.value = WizardStep.FxLoopEntry }
 
-    // -- FX Loop entry (first pedal — must be mono) ----------------------------
+    // -- FX Loop entry (first pedal - must be mono) ----------------------------
     fun onFxLoopEntryCaptured(imagePath: String) {
         viewModelScope.launch {
             monoPosition++

@@ -1,4 +1,4 @@
-package com.pedalboard.recreator.ui.screens
+ï»¿package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -76,7 +76,7 @@ fun SessionListScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "${session.section} — ${session.part}",
+                            text = "${session.section} - ${session.part}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
