@@ -52,7 +52,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
     fun onAmpCaptured(imagePath: String) {
         viewModelScope.launch {
             val id = UUID.randomUUID().toString()
-            dao.insertPedal(PedalEntity(id, sessionId, "Amp Input", imagePath, imagePath, ChainStage.AMP, 0, ChannelType.MONO))
+            dao.insertPedal(PedalEntity(id, sessionId, "Guitar Output", imagePath, imagePath, ChainStage.AMP, 0, ChannelType.MONO))
             lastMonoId = id
             monoPosition = 0
             _step.value = WizardStep.PreAmpQuestion
@@ -179,3 +179,4 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     fun finishWizard() { _step.value = WizardStep.Finished }
 }
+
