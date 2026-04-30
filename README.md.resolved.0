@@ -1,0 +1,40 @@
+# Pedalboard Recreator App
+
+An Android app for musicians to document and recreate their analogue guitar pedalboards with precise visual accuracy.
+
+## Features
+- **Session Management**: Group pedalboards by Song, Section, and Part.
+- **Pedal Capture**: Use CameraX to capture pedalboard overviews and individual pedals.
+- **Cropping & UI**: Drag and crop pedal images.
+- **Signal Chain**: Support for strictly linear Pre-Amp routing and complex branching (Stereo/Parallel) in the FX Loop.
+- **Export & Import**: Export sessions (with JSON and zipped image directories) and import them losslessly.
+
+## Build Instructions (For macOS/Linux/Windows with Android SDK)
+
+Due to environment constraints, this project scaffold was generated headlessly. To compile and generate a signed APK, please move this directory to a system with the Android SDK installed (such as your local machine with Android Studio) and follow these steps:
+
+1. **Open the Project in Android Studio**:
+   - Launch Android Studio and select **Open**.
+   - Navigate to the `PedalboardApp` directory and select it.
+   - Wait for Gradle Sync to complete.
+
+2. **Generate a Keystore (If you don't have one)**:
+   - In Android Studio, go to **Build** > **Generate Signed Bundle / APK**.
+   - Select **APK** and click Next.
+   - Under **Key store path**, click **Create new...**.
+   - Fill in the details (password, alias, validity) and save the `.jks` file.
+
+3. **Build the Signed APK**:
+   - Follow the prompts in the wizard to select the `release` build variant.
+   - Click **Finish**.
+   - Once completed, the signed `app-release.apk` will be located in `app/release/`.
+
+4. **Sideload onto Pixel 9 Pro**:
+   - Connect your Pixel 9 Pro to your computer via USB.
+   - Ensure Developer Options and USB Debugging are enabled.
+   - Run: `adb install app/release/app-release.apk`
+
+## Project Structure
+- `app/src/main/java/com/pedalboard/recreator/data`: Room DB, Entities, and Daos.
+- `app/src/main/java/com/pedalboard/recreator/ui`: Jetpack Compose Screens and Theming.
+- `app/src/main/java/com/pedalboard/recreator/utils`: ZIP management for Export/Import.

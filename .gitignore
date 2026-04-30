@@ -1,0 +1,37 @@
+# Built outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+build/
+.gradle/
+captures/
+
+# IntelliJ / Android Studio
+*.iml
+.idea/
+*.iws
+*.ipr
+out/
+
+# Keystore
+*.jks
+*.keystore
+
+# Local machine properties
+local.properties
+
+# Kotlin
+*.class
+
+# Gradle wrapper jar
+gradle/wrapper/gradle-wrapper.jar
+
+# Node
+node_modules/
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
