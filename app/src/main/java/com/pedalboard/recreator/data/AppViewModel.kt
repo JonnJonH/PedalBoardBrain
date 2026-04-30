@@ -11,6 +11,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = AppDatabase.getDatabase(application).dao()
 
     val sessions = dao.getAllSessions()
+    val songTitles = sessions.map { list -> list.map { it.songTitle }.distinct().sorted() }
 
     private val _currentSession = MutableStateFlow<SessionEntity?>(null)
     val currentSession: StateFlow<SessionEntity?> = _currentSession.asStateFlow()

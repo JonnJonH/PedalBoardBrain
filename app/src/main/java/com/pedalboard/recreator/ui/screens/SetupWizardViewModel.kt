@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 sealed class WizardStep {
+    object GuitarInput : WizardStep()
     object AmpInput : WizardStep()
     // Pre-amp: ask first, then capture, then continue
     object PreAmpQuestion : WizardStep()
@@ -31,7 +32,7 @@ sealed class WizardStep {
 class SetupWizardViewModel(application: Application, private val sessionId: String) : AndroidViewModel(application) {
     private val dao = AppDatabase.getDatabase(application).dao()
 
-    private val _step = MutableStateFlow<WizardStep>(WizardStep.AmpInput)
+    private val _step = MutableStateFlow<WizardStep>(WizardStep.GuitarInput)
     val step: StateFlow<WizardStep> = _step.asStateFlow()
 
     private val _signalState = MutableStateFlow(SignalState.MONO)
@@ -49,13 +50,24 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
     private var monoPosition: Int = 0
     private var preAmpCount: Int = 0
 
+        // -- Guitar ---------------------------------------------------------------
+    fun onGuitarCaptured(imagePath: String) {
+        viewModelScope.launch {
+            val id = UUID.randomUUID().toString()
+            dao.insertPedal(PedalEntity(id, sessionId, "Guitar", imagePath, imagePath, ChainStage.GUITAR, 0, ChannelType.MONO))
+            lastMonoId = id
+            monoPosition = 0
+            _step.value = WizardStep.AmpInput
+        }
+    }
     // -- Amp ------------------------------------------------------------------
     fun onAmpCaptured(imagePath: String) {
         viewModelScope.launch {
+            monoPosition++
             val id = UUID.randomUUID().toString()
-            dao.insertPedal(PedalEntity(id, sessionId, "Amp", imagePath, imagePath, ChainStage.AMP, 0, ChannelType.MONO))
+            dao.insertPedal(PedalEntity(id, sessionId, "Amp", imagePath, imagePath, ChainStage.AMP, monoPosition, ChannelType.MONO))
+            lastMonoId?.let { dao.insertConnection(ConnectionEntity(UUID.randomUUID().toString(), sessionId, it, id, ChannelType.MONO)) }
             lastMonoId = id
-            monoPosition = 0
             _step.value = WizardStep.PreAmpQuestion
         }
     }

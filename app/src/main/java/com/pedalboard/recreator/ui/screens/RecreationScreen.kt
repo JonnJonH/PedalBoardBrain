@@ -1,4 +1,4 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -20,6 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
 import com.pedalboard.recreator.data.AppViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -53,38 +57,70 @@ fun RecreationScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 val pedal = pedals[page]
+                
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    if (pedal.croppedImagePath != null) {
-                        AsyncImage(
-                            model = pedal.croppedImagePath,
-                            contentDescription = pedal.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentScale = ContentScale.Fit
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No Image Available", color = Color.Gray)
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        var scale by remember { mutableStateOf(1f) }
+                        var offset by remember { mutableStateOf(Offset.Zero) }
+                        val density = androidx.compose.ui.platform.LocalDensity.current
+                        
+                        val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
+                            scale = (scale * zoomChange).coerceIn(1f, 5f)
+                            if (scale > 1f) {
+                                val widthPx = with(density) { maxWidth.toPx() }
+                                val heightPx = with(density) { maxHeight.toPx() }
+                                val maxOffsetX = (widthPx * (scale - 1)) / 2
+                                val maxOffsetY = (heightPx * (scale - 1)) / 2
+                                offset = Offset(
+                                    x = (offset.x + offsetChange.x).coerceIn(-maxOffsetX, maxOffsetX),
+                                    y = (offset.y + offsetChange.y).coerceIn(-maxOffsetY, maxOffsetY)
+                                )
+                            } else {
+                                offset = Offset.Zero
+                            }
+                        }
+
+                        if (pedal.imagePath != null) {
+                            AsyncImage(
+                                model = pedal.imagePath,
+                                contentDescription = pedal.name,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .transformable(state = transformState)
+                                    .graphicsLayer(
+                                        scaleX = scale,
+                                        scaleY = scale,
+                                        translationX = offset.x,
+                                        translationY = offset.y
+                                    ),
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("No Image Available", color = Color.Gray)
+                            }
                         }
                     }
 
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(24.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                     ) {
                         Column(
                             modifier = Modifier.padding(24.dp),
@@ -102,7 +138,19 @@ fun RecreationScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            
                             Spacer(modifier = Modifier.height(16.dp))
+                            if (session?.notes?.isNotBlank() == true) {
+                                Text(
+                                    text = "SESSION NOTES:\n${session!!.notes}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            
                             Text(
                                 text = "Swipe for next pedal",
                                 style = MaterialTheme.typography.bodySmall,
@@ -140,7 +188,3 @@ fun RecreationScreen(
         }
     }
 }
-
-
-
-

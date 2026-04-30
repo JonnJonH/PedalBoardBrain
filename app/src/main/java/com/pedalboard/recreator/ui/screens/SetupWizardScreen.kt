@@ -54,6 +54,11 @@ fun SetupWizardScreen(
                     when (currentStep) {
 
                         // -- Amp ----------------------------------------------
+                                                // -- Guitar -------------------------------------------
+                        is WizardStep.GuitarInput -> {
+                            WizardPrompt("Your Guitar", "Take a photo of the guitar at the start of your signal chain.")
+                            WizardButton("Take Photo") { launchCamera { viewModel.onGuitarCaptured(it) } }
+                        }
                         is WizardStep.AmpInput -> {
                             WizardPrompt("Start Session", "Take a photo of your amp or amp settings.")
                             WizardButton("Take Photo") { launchCamera { viewModel.onAmpCaptured(it) } }

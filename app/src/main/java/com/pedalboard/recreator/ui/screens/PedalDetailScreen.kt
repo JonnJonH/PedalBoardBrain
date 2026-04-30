@@ -1,4 +1,4 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,6 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.RectangleShape
 import com.pedalboard.recreator.data.AppViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,21 +87,51 @@ fun PedalDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Pedal Image
-            Box(
+                                    // Pedal Image
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(400.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                if (pedal.croppedImagePath != null) {
+                var scale by remember { mutableStateOf(1f) }
+                var offset by remember { mutableStateOf(Offset.Zero) }
+                val density = androidx.compose.ui.platform.LocalDensity.current
+                
+                val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
+                    scale = (scale * zoomChange).coerceIn(1f, 5f)
+                    if (scale > 1f) {
+                        val widthPx = with(density) { maxWidth.toPx() }
+                        val heightPx = with(density) { maxHeight.toPx() }
+                        
+                        val maxOffsetX = (widthPx * (scale - 1)) / 2
+                        val maxOffsetY = (heightPx * (scale - 1)) / 2
+                        
+                        offset = Offset(
+                            x = (offset.x + offsetChange.x).coerceIn(-maxOffsetX, maxOffsetX),
+                            y = (offset.y + offsetChange.y).coerceIn(-maxOffsetY, maxOffsetY)
+                        )
+                    } else {
+                        offset = Offset.Zero
+                    }
+                }
+
+                if (pedal.imagePath != null) {
                     AsyncImage(
-                        model = pedal.croppedImagePath,
+                        model = pedal.imagePath,
                         contentDescription = pedal.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .transformable(state = transformState)
+                            .graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale,
+                                translationX = offset.x,
+                                translationY = offset.y
+                            ),
+                        contentScale = ContentScale.Fit
                     )
                 }
             }

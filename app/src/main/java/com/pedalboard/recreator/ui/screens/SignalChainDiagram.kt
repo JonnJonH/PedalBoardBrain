@@ -33,6 +33,7 @@ fun SignalChainDiagram(
     onPedalClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val guitar     = pedals.find { it.chainStage == ChainStage.GUITAR }
     val amp        = pedals.find { it.chainStage == ChainStage.AMP }
     val preAmp     = pedals.filter { it.chainStage == ChainStage.PRE_AMP }.sortedBy { it.position }
     val fxLoop     = pedals.filter { it.chainStage == ChainStage.FX_LOOP }.sortedBy { it.position }
@@ -67,9 +68,13 @@ fun SignalChainDiagram(
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(vertical = 24.dp, horizontal = 16.dp)
     ) {
-        // -- Guitar entry point ------------------------------------------------
+                // -- Guitar entry point ------------------------------------------------
         item {
-            ChainTerminal("GUITAR IN")
+            if (guitar != null) {
+                NodeCard(guitar, onPedalClick, label = "GUITAR")
+            } else {
+                ChainTerminal("GUITAR IN")
+            }
             DiagramArrow()
         }
 
@@ -184,12 +189,12 @@ fun NodeCard(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                if (pedal.croppedImagePath != null) {
+                if (pedal.imagePath != null) {
                     AsyncImage(
-                        model = pedal.croppedImagePath,
+                        model = pedal.imagePath,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
                 // Stage badge (AMP, STEREO, etc.)

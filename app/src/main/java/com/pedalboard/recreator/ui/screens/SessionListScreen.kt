@@ -1,6 +1,7 @@
 package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,11 +9,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pedalboard.recreator.data.AppViewModel
 import com.pedalboard.recreator.data.SessionEntity
@@ -27,6 +31,11 @@ fun SessionListScreen(
     var showCreateDialog by remember { mutableStateOf(false) }
     var sessionForAction by remember { mutableStateOf<SessionEntity?>(null) }
     val sessions by viewModel.sessions.collectAsStateWithLifecycle(initialValue = emptyList())
+    val existingSongs by viewModel.songTitles.collectAsStateWithLifecycle(initialValue = emptyList())
+
+    val groupedSessions = remember(sessions) {
+        sessions.groupBy { it.songTitle }.toSortedMap()
+    }
 
     Scaffold(
         topBar = {
@@ -60,42 +69,92 @@ fun SessionListScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(sessions, key = { it.id }) { session ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .combinedClickable(
-                            onClick = { onNavigateToDetail(session.id) },
-                            onLongClick = { sessionForAction = session }
-                        ),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
+            groupedSessions.forEach { (songTitle, songSessions) ->
+                // Group Header (Optional but good for clarity)
+                item(key = "header_$songTitle") {
+                    Row(
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = session.songTitle,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            text = songTitle.uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
-                        val subtitle = listOf(session.section, session.part)
-                            .filter { it.isNotBlank() }.joinToString(" / ")
-                        if (subtitle.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        if (songSessions.size > 1) {
+                            Spacer(Modifier.width(8.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            ) {
+                                Text(
+                                    text = "${songSessions.size} SESSIONS",
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
-                        if (session.notes.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = session.notes,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
+                    }
+                }
+
+                items(songSessions, key = { it.id }) { session ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(
+                                onClick = { onNavigateToDetail(session.id) },
+                                onLongClick = { sessionForAction = session }
+                            ),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    val title = if (session.section.isNotBlank()) session.section else "Untitled Section"
+                                    Text(
+                                        text = title,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (session.part.isNotBlank()) {
+                                        Text(
+                                            text = session.part,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                                
+                                if (songSessions.size > 1) {
+                                    Icon(
+                                        Icons.Default.Layers,
+                                        contentDescription = "Part of a song group",
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            if (session.notes.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = session.notes,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                    maxLines = 2
+                                )
+                            }
                         }
                     }
                 }
@@ -136,6 +195,7 @@ fun SessionListScreen(
 
         if (showCreateDialog) {
             CreateSessionDialog(
+                existingSongs = existingSongs,
                 onDismiss = { showCreateDialog = false },
                 onCreate = { songTitle, section, part, notes ->
                     val newSession = SessionEntity(
@@ -156,8 +216,10 @@ fun SessionListScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateSessionDialog(
+    existingSongs: List<String>,
     onDismiss: () -> Unit,
     onCreate: (String, String, String, String) -> Unit
 ) {
@@ -165,6 +227,8 @@ fun CreateSessionDialog(
     var section by remember { mutableStateOf("") }
     var part by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+    
+    var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -173,34 +237,60 @@ fun CreateSessionDialog(
         textContentColor = MaterialTheme.colorScheme.onSurface,
         title = { Text("New Session", fontWeight = FontWeight.Bold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = songTitle,
-                    onValueChange = { songTitle = it },
-                    label = { Text("Song Title *") },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Song Title with Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = songTitle,
+                        onValueChange = { songTitle = it },
+                        label = { Text("Song Title *") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                     )
-                )
+                    
+                    if (existingSongs.isNotEmpty()) {
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            existingSongs.forEach { song ->
+                                DropdownMenuItem(
+                                    text = { Text(song) },
+                                    onClick = {
+                                        songTitle = song
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = section,
                     onValueChange = { section = it },
                     label = { Text("Section (e.g. Chorus)") },
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = part,
                     onValueChange = { part = it },
                     label = { Text("Part (e.g. Lead)") },
-                    singleLine = true
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
                     label = { Text("Notes") },
-                    minLines = 2
+                    minLines = 3,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
