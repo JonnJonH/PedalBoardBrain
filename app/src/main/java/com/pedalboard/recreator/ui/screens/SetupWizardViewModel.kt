@@ -15,6 +15,7 @@ sealed class WizardStep {
     object PreAmpCapture : WizardStep()
     object PreAmpContinue : WizardStep()
     // FX Loop
+    object PostPreAmpChoice : WizardStep()
     object FxLoopEntry : WizardStep()
     object FxLoopMonoChoice : WizardStep()
     object FxLoopStereo : WizardStep()
@@ -61,7 +62,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     // -- Pre-amp ---------------------------------------------------------------
     fun answerHasPreAmp(hasPreAmp: Boolean) {
-        _step.value = if (hasPreAmp) WizardStep.PreAmpCapture else WizardStep.FxLoopEntry
+        _step.value = if (hasPreAmp) WizardStep.PreAmpCapture else WizardStep.PostPreAmpChoice
     }
 
     fun onPreAmpPedalCaptured(imagePath: String) {
@@ -77,7 +78,8 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
     }
 
     fun addAnotherPreAmp() { _step.value = WizardStep.PreAmpCapture }
-    fun finishPreAmp()     { _step.value = WizardStep.FxLoopEntry }
+    fun finishPreAmp()     { _step.value = WizardStep.PostPreAmpChoice }
+    fun goToFxLoop()      { _step.value = WizardStep.FxLoopEntry }
 
     // -- FX Loop entry (first pedal - must be mono) ----------------------------
     fun onFxLoopEntryCaptured(imagePath: String) {
@@ -179,6 +181,8 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     fun finishWizard() { _step.value = WizardStep.Finished }
 }
+
+
 
 
 

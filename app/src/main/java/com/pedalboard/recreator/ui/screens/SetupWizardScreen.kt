@@ -79,6 +79,13 @@ fun SetupWizardScreen(
                             }
                         }
 
+                        is WizardStep.PostPreAmpChoice -> {
+                            WizardPrompt("Pre-Amp Complete", "Do you have pedals in the FX loop?")
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                WizardButton("Add FX Loop Pedals") { viewModel.goToFxLoop() }
+                                WizardButton("Finish Session", secondary = true) { viewModel.finishWizard() }
+                            }
+                        }
                         // -- FX Loop entry -------------------------------------
                         is WizardStep.FxLoopEntry -> {
                             WizardPrompt("FX Loop - First Pedal", "Take a photo of the FIRST pedal in the FX loop.\n\nThis must be a Mono input.")
@@ -171,6 +178,7 @@ fun WizardButton(text: String, modifier: Modifier = Modifier, secondary: Boolean
         Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
     }
 }
+
 
 
 
