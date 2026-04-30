@@ -81,7 +81,7 @@ fun SetupWizardScreen(
 
                         // -- FX Loop entry -------------------------------------
                         is WizardStep.FxLoopEntry -> {
-                            WizardPrompt("FX Loop - First Pedal in the FX loop.\n\nThis must be a Mono input.")
+                            WizardPrompt("FX Loop - First Pedal", "Take a photo of the FIRST pedal in the FX loop.\n\nThis must be a Mono input.")
                             WizardButton("Take Photo") { launchCamera { viewModel.onFxLoopEntryCaptured(it) } }
                         }
                         is WizardStep.FxLoopMonoChoice -> {
@@ -171,5 +171,6 @@ fun WizardButton(text: String, modifier: Modifier = Modifier, secondary: Boolean
         Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
     }
 }
+
 
 
