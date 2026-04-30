@@ -74,7 +74,7 @@ fun SetupWizardScreen(
                         is WizardStep.PreAmpContinue -> {
                             WizardPrompt("Pre-Amp Pedal", "Pedal captured. Any more pre-amp pedals?")
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                WizardButton("Add Another Pre-Amp Pedal") { viewModel.addAnotherPreAmp() }
+                                WizardButton("Add Another Pre-Amp Pedal") { launchCamera { viewModel.onPreAmpPedalCaptured(it) } }
                                 WizardButton("Done - Go to FX Loop", secondary = true) { viewModel.finishPreAmp() }
                             }
                         }
@@ -171,6 +171,7 @@ fun WizardButton(text: String, modifier: Modifier = Modifier, secondary: Boolean
         Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
     }
 }
+
 
 
 
