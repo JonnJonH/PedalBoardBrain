@@ -1,4 +1,4 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
@@ -112,7 +112,7 @@ fun SetupWizardScreen(
                         is WizardStep.FxLoopSplitLeftChoice -> {
                             WizardPrompt("LEFT Branch", "Left pedal captured. Any more on the LEFT before the merge?")
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                WizardButton("Add Another Left Pedal") { viewModel.addMoreLeft() }
+                                WizardButton("Add Another Left Pedal") { viewModel.incrementLeft(); launchCamera { viewModel.onFxSplitLeftCaptured(it) } }
                                 WizardButton("No More Left Pedals Before Merge", secondary = true) { viewModel.doneWithLeft() }
                             }
                         }
@@ -123,7 +123,7 @@ fun SetupWizardScreen(
                         is WizardStep.FxLoopSplitRightChoice -> {
                             WizardPrompt("RIGHT Branch", "Right pedal captured. Any more on the RIGHT before the merge?")
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                WizardButton("Add Another Right Pedal") { viewModel.addMoreRight() }
+                                WizardButton("Add Another Right Pedal") { viewModel.incrementRight(); launchCamera { viewModel.onFxSplitRightCaptured(it) } }
                                 WizardButton("No More Right Pedals Before Merge", secondary = true) { viewModel.doneWithRight() }
                             }
                         }
@@ -171,6 +171,7 @@ fun WizardButton(text: String, modifier: Modifier = Modifier, secondary: Boolean
         Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
     }
 }
+
 
 
 

@@ -1,4 +1,4 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -142,7 +142,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
         }
     }
 
-    fun addMoreLeft()  { leftPosition++;  _step.value = WizardStep.FxLoopSplitLeft }
+    fun incrementLeft() { leftPosition++ }  // just increment, camera launched directly from screen
     fun doneWithLeft() { _step.value = WizardStep.FxLoopSplitRight }
 
     fun onFxSplitRightCaptured(imagePath: String) {
@@ -155,7 +155,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
         }
     }
 
-    fun addMoreRight()  { rightPosition++; _step.value = WizardStep.FxLoopSplitRight }
+    fun incrementRight() { rightPosition++ }  // just increment, camera launched directly from screen
     fun doneWithRight() { _step.value = WizardStep.FxLoopPostSplitChoice }
 
     // -- Merge -----------------------------------------------------------------
@@ -179,4 +179,6 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     fun finishWizard() { _step.value = WizardStep.Finished }
 }
+
+
 
