@@ -1,4 +1,4 @@
-﻿package com.pedalboard.recreator.ui.screens
+package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,9 +33,9 @@ fun SignalChainDiagram(
     onPedalClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val amp = pedals.find { it.chainStage == ChainStage.AMP }
-    val preAmp = pedals.filter { it.chainStage == ChainStage.PRE_AMP }.sortedBy { it.position }
-    val fxLoop = pedals.filter { it.chainStage == ChainStage.FX_LOOP }.sortedBy { it.position }
+    val amp        = pedals.find { it.chainStage == ChainStage.AMP }
+    val preAmp     = pedals.filter { it.chainStage == ChainStage.PRE_AMP }.sortedBy { it.position }
+    val fxLoop     = pedals.filter { it.chainStage == ChainStage.FX_LOOP }.sortedBy { it.position }
 
     val leftPedals  = fxLoop.filter { it.channel == ChannelType.LEFT  }.sortedBy { it.position }
     val rightPedals = fxLoop.filter { it.channel == ChannelType.RIGHT }.sortedBy { it.position }
@@ -44,19 +44,18 @@ fun SignalChainDiagram(
     val hasSplit = leftPedals.isNotEmpty() || rightPedals.isNotEmpty()
 
     val splitStartPos = if (hasSplit) minOf(
-        leftPedals.minByOrNull { it.position }?.position ?: Int.MAX_VALUE,
+        leftPedals.minByOrNull  { it.position }?.position ?: Int.MAX_VALUE,
         rightPedals.minByOrNull { it.position }?.position ?: Int.MAX_VALUE
     ) else Int.MAX_VALUE
 
     val splitEndPos = if (hasSplit) maxOf(
-        leftPedals.maxByOrNull { it.position }?.position ?: Int.MIN_VALUE,
+        leftPedals.maxByOrNull  { it.position }?.position ?: Int.MIN_VALUE,
         rightPedals.maxByOrNull { it.position }?.position ?: Int.MIN_VALUE
     ) else Int.MIN_VALUE
 
     val preSplitSingle  = singlePath.filter { it.position < splitStartPos }
     val postSplitSingle = singlePath.filter { it.position > splitEndPos }
 
-    // Build split rows as a list so we can use itemsIndexed
     val splitRows: List<Pair<PedalEntity?, PedalEntity?>> = if (hasSplit) {
         (splitStartPos..splitEndPos).map { pos ->
             leftPedals.find { it.position == pos } to rightPedals.find { it.position == pos }
@@ -68,24 +67,33 @@ fun SignalChainDiagram(
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(vertical = 24.dp, horizontal = 16.dp)
     ) {
+        // -- Guitar entry point ------------------------------------------------
         item {
-            amp?.let {
-                NodeCard(it, onPedalClick)
-                DiagramArrow()
-            }
+            ChainTerminal("GUITAR IN")
+            DiagramArrow()
         }
 
+        // -- Pre-amp pedals ----------------------------------------------------
         itemsIndexed(preAmp) { _, p ->
             NodeCard(p, onPedalClick)
             DiagramArrow()
         }
 
+        // -- Amp (between pre-amp and FX loop) ---------------------------------
+        item {
+            amp?.let {
+                NodeCard(it, onPedalClick, label = "AMP")
+                DiagramArrow()
+            }
+        }
+
+        // -- FX loop pre-split single path -------------------------------------
         itemsIndexed(preSplitSingle) { _, p ->
             NodeCard(p, onPedalClick, isStereo = p.channel == ChannelType.STEREO)
             DiagramArrow()
         }
 
-        // Split rows - two columns, empty slots show a dashed pass-through line
+        // -- Split rows (asymmetric branches with pass-through slots) ----------
         itemsIndexed(splitRows) { index, (left, right) ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -94,7 +102,8 @@ fun SignalChainDiagram(
             ) {
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     if (index == 0) {
-                        Text("LEFT", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text("LEFT", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(4.dp))
                     }
                     if (left != null) NodeCard(left, onPedalClick) else PassThroughSlot()
@@ -102,7 +111,8 @@ fun SignalChainDiagram(
                 Spacer(Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     if (index == 0) {
-                        Text("RIGHT", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                        Text("RIGHT", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(4.dp))
                     }
                     if (right != null) NodeCard(right, onPedalClick) else PassThroughSlot()
@@ -111,24 +121,31 @@ fun SignalChainDiagram(
             DiagramArrow()
         }
 
+        // -- Post-split / post-merge single path -------------------------------
         itemsIndexed(postSplitSingle) { _, p ->
             NodeCard(p, onPedalClick, isStereo = p.channel == ChannelType.STEREO)
             DiagramArrow()
         }
 
+        // -- Amp return terminal -----------------------------------------------
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("AMP RETURN", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
-            }
+            ChainTerminal("AMP RETURN")
         }
+    }
+}
+
+@Composable
+fun ChainTerminal(label: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(0.5f)
+            .height(40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
     }
 }
 
@@ -153,7 +170,12 @@ fun PassThroughSlot() {
 }
 
 @Composable
-fun NodeCard(pedal: PedalEntity, onPedalClick: (String) -> Unit, isStereo: Boolean = false) {
+fun NodeCard(
+    pedal: PedalEntity,
+    onPedalClick: (String) -> Unit,
+    isStereo: Boolean = false,
+    label: String? = null
+) {
     Card(
         onClick = { onPedalClick(pedal.id) },
         modifier = Modifier.size(width = 140.dp, height = 100.dp).padding(2.dp),
@@ -170,13 +192,19 @@ fun NodeCard(pedal: PedalEntity, onPedalClick: (String) -> Unit, isStereo: Boole
                         contentScale = ContentScale.Crop
                     )
                 }
-                if (isStereo) {
+                // Stage badge (AMP, STEREO, etc.)
+                val badge = label ?: if (isStereo) "STEREO" else null
+                if (badge != null) {
                     Text(
-                        "STEREO",
-                        modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
-                            .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                        badge,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                            .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(4.dp))
                             .padding(horizontal = 4.dp, vertical = 2.dp),
-                        color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold
+                        color = if (label != null) MaterialTheme.colorScheme.primary else Color.White,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
