@@ -54,8 +54,8 @@ fun SignalChainDiagram(
         rightPedals.maxByOrNull { it.position }?.position ?: Int.MIN_VALUE
     ) else Int.MIN_VALUE
 
-    val preSplitSingle  = singlePath.filter { it.position < splitStartPos }
-    val postSplitSingle = singlePath.filter { it.position > splitEndPos }
+    val preSplitSingle  = if (hasSplit) singlePath.filter { it.position < splitStartPos } else singlePath
+    val postSplitSingle = if (hasSplit) singlePath.filter { it.position > splitEndPos } else emptyList()
 
     val splitRows: List<Pair<PedalEntity?, PedalEntity?>> = if (hasSplit) {
         (splitStartPos..splitEndPos).map { pos ->
@@ -185,7 +185,8 @@ fun NodeCard(
         onClick = { onPedalClick(pedal.id) },
         modifier = Modifier.size(width = 140.dp, height = 100.dp).padding(2.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -231,6 +232,6 @@ fun DiagramArrow() {
         Icons.Default.ArrowDownward,
         contentDescription = null,
         modifier = Modifier.size(28.dp).padding(vertical = 2.dp),
-        tint = Color.Gray.copy(alpha = 0.6f)
+        tint = MaterialTheme.colorScheme.secondary
     )
 }

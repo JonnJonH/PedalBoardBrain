@@ -158,6 +158,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     fun incrementLeft() { leftPosition++ }  // just increment, camera launched directly from screen
     fun doneWithLeft() { _step.value = WizardStep.FxLoopSplitRight }
+    fun skipLeft() { _step.value = WizardStep.FxLoopSplitRight }
 
     fun onFxSplitRightCaptured(imagePath: String) {
         viewModelScope.launch {
@@ -171,6 +172,7 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
 
     fun incrementRight() { rightPosition++ }  // just increment, camera launched directly from screen
     fun doneWithRight() { _step.value = WizardStep.FxLoopPostSplitChoice }
+    fun skipRight() { _step.value = WizardStep.FxLoopPostSplitChoice }
 
     // -- Merge -----------------------------------------------------------------
     fun chooseMerge() { _step.value = WizardStep.FxLoopMerge }
@@ -180,8 +182,8 @@ class SetupWizardViewModel(application: Application, private val sessionId: Stri
             monoPosition = maxOf(leftPosition, rightPosition) + 1
             val id = UUID.randomUUID().toString()
             dao.insertPedal(PedalEntity(id, sessionId, "Merge Pedal", imagePath, imagePath, ChainStage.FX_LOOP, monoPosition, ChannelType.STEREO))
-            lastLeftId?.let  { dao.insertConnection(ConnectionEntity(UUID.randomUUID().toString(), sessionId, it, id, ChannelType.LEFT)) }
-            lastRightId?.let { dao.insertConnection(ConnectionEntity(UUID.randomUUID().toString(), sessionId, it, id, ChannelType.RIGHT)) }
+            (lastLeftId ?: splitSourceId)?.let  { dao.insertConnection(ConnectionEntity(UUID.randomUUID().toString(), sessionId, it, id, ChannelType.LEFT)) }
+            (lastRightId ?: splitSourceId)?.let { dao.insertConnection(ConnectionEntity(UUID.randomUUID().toString(), sessionId, it, id, ChannelType.RIGHT)) }
             lastMonoId = id
             lastLeftId = null
             lastRightId = null

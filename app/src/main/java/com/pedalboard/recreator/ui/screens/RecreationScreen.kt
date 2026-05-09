@@ -1,6 +1,8 @@
 package com.pedalboard.recreator.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -120,7 +122,8 @@ fun RecreationScreen(
                             .fillMaxWidth()
                             .padding(16.dp),
                         shape = RoundedCornerShape(24.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                     ) {
                         Column(
                             modifier = Modifier.padding(24.dp),
@@ -182,7 +185,7 @@ fun RecreationScreen(
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                    .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp)).border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }

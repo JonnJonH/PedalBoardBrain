@@ -2,10 +2,11 @@ package com.pedalboard.recreator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val DeepCharcoal = Color(0xFF121212)
-val DarkSurface = Color(0xFF1E1E1E)
-val WarmAmber = Color(0xFFF57C00) // Warm, not neon
-val WarmAmberLight = Color(0xFFFFB74D)
-val LightText = Color(0xFFEEEEEE)
-val MutedText = Color(0xFFAAAAAA)
-val ErrorRed = Color(0xFFCF6679)
+val MidnightBlack = Color(0xFF08080A)
+val ObsidianSurface = Color(0xFF121214)
+val LuxuryGold = Color(0xFFD4AF37)
+val LuxuryGoldLight = Color(0xFFFFD700)
+val SignalCyan = Color(0xFF00E5FF)
+val LightText = Color(0xFFF0F0F2)
+val MutedText = Color(0xFF88888E)
+val ErrorRed = Color(0xFFEF5350)

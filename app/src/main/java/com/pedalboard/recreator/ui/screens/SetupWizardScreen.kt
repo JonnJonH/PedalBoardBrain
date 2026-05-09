@@ -119,7 +119,10 @@ fun SetupWizardScreen(
                         // -- Split ---------------------------------------------
                         is WizardStep.FxLoopSplitLeft -> {
                             WizardPrompt("LEFT Branch", "Take a photo of the next pedal on the LEFT branch.")
-                            WizardButton("Take Photo (Left)") { launchCamera { viewModel.onFxSplitLeftCaptured(it) } }
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                WizardButton("Take Photo (Left)") { launchCamera { viewModel.onFxSplitLeftCaptured(it) } }
+                                WizardButton("No Pedals (Cable Only)", secondary = true) { viewModel.skipLeft() }
+                            }
                         }
                         is WizardStep.FxLoopSplitLeftChoice -> {
                             WizardPrompt("LEFT Branch", "Left pedal captured. Any more on the LEFT before the merge?")
@@ -130,7 +133,10 @@ fun SetupWizardScreen(
                         }
                         is WizardStep.FxLoopSplitRight -> {
                             WizardPrompt("RIGHT Branch", "Take a photo of the next pedal on the RIGHT branch.")
-                            WizardButton("Take Photo (Right)") { launchCamera { viewModel.onFxSplitRightCaptured(it) } }
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                WizardButton("Take Photo (Right)") { launchCamera { viewModel.onFxSplitRightCaptured(it) } }
+                                WizardButton("No Pedals (Cable Only)", secondary = true) { viewModel.skipRight() }
+                            }
                         }
                         is WizardStep.FxLoopSplitRightChoice -> {
                             WizardPrompt("RIGHT Branch", "Right pedal captured. Any more on the RIGHT before the merge?")

@@ -12,16 +12,16 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = WarmAmber,
-    secondary = WarmAmberLight,
-    background = DeepCharcoal,
-    surface = DarkSurface,
-    onPrimary = DeepCharcoal,
-    onSecondary = DeepCharcoal,
+    primary = LuxuryGold,
+    secondary = SignalCyan,
+    background = MidnightBlack,
+    surface = ObsidianSurface,
+    onPrimary = MidnightBlack,
+    onSecondary = MidnightBlack,
     onBackground = LightText,
     onSurface = LightText,
     error = ErrorRed,
-    surfaceVariant = Color(0xFF2A2A2A) // for cards
+    surfaceVariant = Color(0xFF1A1A1D)
 )
 
 @Composable
@@ -48,5 +48,3 @@ fun PedalboardRecreatorTheme(
         content = content
     )
 }
-
-
